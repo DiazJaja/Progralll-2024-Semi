@@ -1,0 +1,80 @@
+<form id="frmBusquedaAlumno">
+    <div class="card text-bg-dark mb-3">
+        <div class="card-header">
+            <div class="d-flex">
+                Consulta de Alumnos
+                <div class="ms-auto">
+                    <button type="button" data-form="busqueda_alumnos" class="btn-close btn-close-white" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+
+            <div class="mb-3">
+                <input type="text" id="searchAlumno" class="form-control" placeholder="Buscar por código, nombre o teléfono..." onkeyup="buscarAlumno()">
+            </div>
+            <table class="table table-hover" id="tblAlumnos">
+                <thead>
+                    <tr>
+                        <th>CODIGO</th>
+                        <th>NOMBRE</th>
+                        <th>DIRECCION</th>
+                        <th>TEL</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script>
+    function eliminarAlumno(idAlumno) {
+        let datos = {
+            accion: "eliminar",
+            idAlumno: idAlumno,
+        };
+        enviarDatosAlumno(datos);
+    }
+
+    function buscarAlumno() {
+        let query = document.getElementById('searchAlumno').value;
+        consultarAlumnos(query);
+    }
+
+    function consultarAlumnos(query = '') {
+        fetch(`consultar_alumnos/?query=${query}`) 
+        .then(res => res.json())
+        .then(data => {
+            mostrarFilasAlumnos(data); 
+        })
+        .catch(err => console.log(err));
+    }
+
+    function mostrarFilasAlumnos(data = []) {
+        let filas = '';
+        if (data.length === 0) {
+            alertify.notify("Alumno no encontrado.", "error", 5);
+        } else {
+            data.forEach(alumno => {
+                filas += `
+                    <tr onClick='modificarAlumno(${JSON.stringify(alumno)})'>
+                        <td>${alumno.codigo}</td>
+                        <td>${alumno.nombre}</td>
+                        <td>${alumno.direccion}</td>
+                        <td>${alumno.telefono}</td>
+                        <td>
+                            <button type="button" class="btn btn-outline-danger" 
+                                onClick='eliminarAlumno(${alumno.id})'>DEL
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        document.querySelector('#tblAlumnos > tbody').innerHTML = filas;
+    }
+
+    consultarAlumnos();
+</script>
